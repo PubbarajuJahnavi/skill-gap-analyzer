@@ -11,7 +11,7 @@ APP_KEY = os.getenv("ADZUNA_APP_KEY")
 
 COUNTRY = "in"          # India
 ROLE = "software engineer intern"   # change this later to try other roles
-PAGES = 5                # each page returns ~20 jobs, so 5 pages = ~100 jobs
+PAGES = 15              # each page returns ~20 jobs, so 5 pages = ~100 jobs
 
 def fetch_jobs(role, pages):
     all_jobs = []
