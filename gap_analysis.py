@@ -1,13 +1,14 @@
 import pandas as pd
 import ast
 from collections import Counter
-from my_skills import MY_SKILLS
 
-def analyze_gap(jobs_csv_path, my_skills):
+def analyze_gap(jobs_csv_path, my_skills, domain=None):
     df = pd.read_csv(jobs_csv_path)
 
-    # extracted_skills was saved as text like "['python', 'sql']"
-    # ast.literal_eval turns that text back into a real Python list
+    # Filter to just the selected domain, if one is given
+    if domain and domain != "All Domains":
+        df = df[df["domain"] == domain]
+
     df["extracted_skills"] = df["extracted_skills"].apply(ast.literal_eval)
 
     all_skills = []
@@ -16,6 +17,9 @@ def analyze_gap(jobs_csv_path, my_skills):
 
     demand_counts = Counter(all_skills)
     total_jobs = len(df)
+
+    if total_jobs == 0:
+        return pd.DataFrame(columns=["skill", "demand_pct", "you_have_it", "category"])
 
     report = []
     for skill, count in demand_counts.most_common():
@@ -39,9 +43,3 @@ def analyze_gap(jobs_csv_path, my_skills):
         })
 
     return pd.DataFrame(report).sort_values("demand_pct", ascending=False)
-
-if __name__ == "__main__":
-    report_df = analyze_gap("jobs_with_skills.csv", MY_SKILLS)
-    print(report_df.to_string())
-    report_df.to_csv("gap_report.csv", index=False)
-    print("\nSaved full report to gap_report.csv")
