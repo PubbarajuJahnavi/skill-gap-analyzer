@@ -3,4 +3,5 @@ __pycache__/
 *.pyc
 .env
 *.csv
+!jobs_with_skills.csv
 *.pdf
