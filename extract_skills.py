@@ -1,17 +1,37 @@
 import pandas as pd
 import re
+from rapidfuzz import fuzz
 from skills_list import SKILLS_TAXONOMY
 
-def extract_skills(text, skills_taxonomy):
-    if not isinstance(text, str):
+def normalize(text):
+    # Removes dots and hyphens so "React.js", "React-JS", "ReactJS" all become "reactjs"
+    return re.sub(r'[\.\-]', '', text.lower())
+
+def extract_skills(text, skills_taxonomy, threshold=85):
+    if not isinstance(text, str) or text.strip() == "":
         return []
-    text = text.lower()
+
+    text_lower = text.lower()
     found = []
+
     for skill in skills_taxonomy:
         pattern = r'\b' + re.escape(skill) + r'\b'
-        if re.search(pattern, text):
+        if re.search(pattern, text_lower):
             found.append(skill)
-    return found
+            continue
+
+        normalized_skill = normalize(skill)
+        words_in_text = re.findall(r'\b[\w\.\-\+]+\b', text_lower)
+        for word in words_in_text:
+            normalized_word = normalize(word)
+            if len(normalized_word) < 3:
+                continue
+            score = fuzz.ratio(normalized_skill, normalized_word)
+            if score >= threshold:
+                found.append(skill)
+                break
+
+    return list(set(found))
 
 if __name__ == "__main__":
     df = pd.read_csv("raw_jobs.csv")
